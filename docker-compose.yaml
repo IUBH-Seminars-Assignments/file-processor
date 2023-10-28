@@ -1,0 +1,16 @@
+version: "3"
+services:
+  mysql:
+    image: 'mysql:latest'
+    environment:
+      - 'MYSQL_DATABASE=file-processor'
+      - 'MYSQL_PASSWORD=secret'
+      - 'MYSQL_ROOT_PASSWORD=verysecret'
+      - 'MYSQL_USER=fileprocessor'
+    ports:
+      - '3306'
+  mqtt:
+    image: 'eclipse-mosquitto'
+    ports:
+      - '1883'
+      - '9001'
