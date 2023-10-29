@@ -10,7 +10,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.ArrayList;
 
 @Component
 public class FileUploadSubscriber {
@@ -40,16 +40,34 @@ public class FileUploadSubscriber {
     }
 
     private void processMessage(FileUploadMessage fileUploadMessage) {
+        MedicalRecord medicalRecord = createNewMedicalRecord(fileUploadMessage);
+        mergeWithPatientRecord(medicalRecord);
+    }
+
+    private MedicalRecord createNewMedicalRecord(FileUploadMessage message) {
         MedicalRecord medicalRecord = new MedicalRecord();
-        medicalRecord.setExternalId(fileUploadMessage.id());
-        medicalRecord.setExternalIdType(fileUploadMessage.idName());
-        medicalRecord.setFileContents(fileUploadMessage.filePayload());
-        medicalRecord.setFileFormat(fileUploadMessage.payloadFormat());
-        MedicalRecord updatedMedicalRecord = medicalRecordRepository.save(medicalRecord);
-        Optional<PatientRecord> patientRecord = patientRecordRepository.findByRecords_ExternalId(medicalRecord.getExternalId());
-        patientRecord.ifPresent(pr -> {
-            pr.getRecords().add(updatedMedicalRecord);
-            patientRecordRepository.save(pr);
-        });
+        medicalRecord.setExternalId(message.id());
+        medicalRecord.setExternalIdType(message.idName());
+        medicalRecord.setFileContents(message.filePayload());
+        medicalRecord.setFileFormat(message.payloadFormat());
+        return medicalRecordRepository.save(medicalRecord);
+    }
+
+    private void mergeWithPatientRecord(MedicalRecord medicalRecord) {
+        patientRecordRepository.findByRecords_ExternalId(medicalRecord.getExternalId())
+                .ifPresentOrElse(pr -> updatePatientRecord(pr, medicalRecord),
+                        () -> createNewPatientRecord(medicalRecord));
+    }
+
+    private void updatePatientRecord(PatientRecord patientRecord, MedicalRecord medicalRecord) {
+        patientRecord.getRecords().add(medicalRecord);
+        patientRecordRepository.save(patientRecord);
+    }
+
+    private void createNewPatientRecord(MedicalRecord medicalRecord) {
+        PatientRecord patientRecord = new PatientRecord();
+        patientRecord.setRecords(new ArrayList<>());
+        patientRecord.getRecords().add(medicalRecord);
+        patientRecordRepository.save(patientRecord);
     }
 }
