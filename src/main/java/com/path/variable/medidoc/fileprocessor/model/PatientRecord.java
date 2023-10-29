@@ -14,4 +14,20 @@ public class PatientRecord {
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<MedicalRecord> records;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public List<MedicalRecord> getRecords() {
+        return records;
+    }
+
+    public void setRecords(List<MedicalRecord> records) {
+        this.records = records;
+    }
 }
