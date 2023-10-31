@@ -1,15 +1,14 @@
-FROM gradle:8.4.0-jdk21-alpine AS BUILD
+FROM gradle:8.4.0-jdk21-alpine AS build
+ARG JAR_NAME
 WORKDIR /usr/app/
 COPY . .
-RUN gradle build -x test
-RUN export JAR_NAME=$(find build/libs/*.jar)
+RUN gradle bootJar -x test
 
 # Package stage
 
-FROM openjdk:21-ea-1-jdk-slim-buster
-#ENV JAR_NAME=fileprocessor-0.0.1-SNAPSHOT.jar
+FROM build
 ENV APP_HOME=/usr/app/
 WORKDIR $APP_HOME
-COPY --from=BUILD $APP_HOME/$JAR_NAME .
-EXPOSE 8080
-ENTRYPOINT exec java -jar $JAR_NAME
+COPY --from=build $APP_HOME/build/libs/$JAR_NAME ./app.jar
+RUN ls -lah
+ENTRYPOINT ["java", "-jar", "app.jar"]
