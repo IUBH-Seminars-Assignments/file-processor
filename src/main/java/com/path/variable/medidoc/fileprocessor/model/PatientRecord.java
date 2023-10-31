@@ -1,6 +1,7 @@
 package com.path.variable.medidoc.fileprocessor.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.List;
 
@@ -9,10 +10,11 @@ import java.util.List;
 public class PatientRecord {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(generator= "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<MedicalRecord> records;
 
     public String getId() {

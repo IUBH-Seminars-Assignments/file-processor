@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface PatientRecordRepository extends JpaRepository<PatientRecord, String> {
 
-    Optional<PatientRecord> findByRecords_ExternalId(String externalId);
+    Optional<PatientRecord> findByRecords_ExternalId_AndRecords_ExternalIdType(String externalId, String externalIdType);
 
 }

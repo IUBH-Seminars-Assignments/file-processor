@@ -83,7 +83,8 @@ public class FileUploadSubscriber implements MqttCallback {
     }
 
     private void mergeWithPatientRecord(MedicalRecord medicalRecord) {
-        patientRecordRepository.findByRecords_ExternalId(medicalRecord.getExternalId())
+        patientRecordRepository.findByRecords_ExternalId_AndRecords_ExternalIdType(medicalRecord.getExternalId(),
+                        medicalRecord.getExternalIdType())
                 .ifPresentOrElse(pr -> updatePatientRecord(pr, medicalRecord),
                         () -> createNewPatientRecord(medicalRecord));
     }
@@ -96,8 +97,10 @@ public class FileUploadSubscriber implements MqttCallback {
     private void createNewPatientRecord(MedicalRecord medicalRecord) {
         PatientRecord patientRecord = new PatientRecord();
         patientRecord.setRecords(new ArrayList<>());
-        patientRecord.getRecords().add(medicalRecord);
-        patientRecordRepository.save(patientRecord);
+        PatientRecord updated = patientRecordRepository.save(patientRecord);
+        updated.getRecords().add(medicalRecord);
+        patientRecordRepository.save(updated);
+
     }
 
     @Override
