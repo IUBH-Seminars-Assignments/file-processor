@@ -1,5 +1,5 @@
 FROM gradle:8.4.0-jdk21-alpine AS build
-ARG JAR_NAME
+ENV JAR_NAME=fileprocessor-0.0.1-SNAPSHOT.jar
 WORKDIR /usr/app/
 COPY . .
 RUN gradle bootJar -x test

@@ -19,8 +19,6 @@ services:
   file-processor:
     build:
       context: .
-      args:
-        JAR_NAME: fileprocessor-0.0.1-SNAPSHOT.jar
     environment:
       - spring_profiles_active=docker
     depends_on:
