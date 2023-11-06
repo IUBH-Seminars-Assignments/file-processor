@@ -55,7 +55,7 @@ public class FileUploadSubscriber extends AbstractSubscriber<FileUploadMessage> 
         MedicalRecord medicalRecord = new MedicalRecord();
         medicalRecord.setExternalId(message.id());
         medicalRecord.setExternalIdType(message.idName());
-        medicalRecord.setFileContents(message.filePayload());
+        medicalRecord.setFileContents(message.fileContents());
         medicalRecord.setFileFormat(message.payloadFormat());
         return medicalRecordRepository.save(medicalRecord);
     }
