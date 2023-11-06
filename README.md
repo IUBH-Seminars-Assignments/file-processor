@@ -1,4 +1,4 @@
-# spring-process-file-upload-and-save
+# file-processor
 
 ![Screen 1](doc/medidoc.png?raw=true "Diagram")
 
