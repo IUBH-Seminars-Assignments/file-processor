@@ -56,6 +56,11 @@ public abstract class AbstractSubscriber<T> implements MqttCallback {
 
     }
 
+    public void subscribe() throws MqttException {
+        mqttClient.setCallback(this);
+        mqttClient.subscribe(getTopic(), 1);
+    }
+
     public abstract String getTopic();
 
     protected void readMessage(MqttMessage message) {

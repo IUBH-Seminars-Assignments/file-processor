@@ -2,7 +2,6 @@ package com.path.variable.medidoc.fileprocessor;
 
 import com.path.variable.medidoc.fileprocessor.subscriber.AbstractSubscriber;
 import jakarta.annotation.PostConstruct;
-import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,18 +16,15 @@ public class MqttRunner {
 
     private final List<AbstractSubscriber<?>> subscribers;
 
-    private final IMqttClient mqttClient;
 
-
-    public MqttRunner(IMqttClient mqttClient, List<AbstractSubscriber<?>> subscribers) {
+    public MqttRunner(List<AbstractSubscriber<?>> subscribers) {
         this.subscribers = subscribers;
-        this.mqttClient = mqttClient;
     }
 
     @PostConstruct
     public void run() throws MqttException {
         for (AbstractSubscriber<?> subscriber : subscribers) {
-            mqttClient.subscribe(subscriber.getTopic(), 1, subscriber::messageArrived);
+            subscriber.subscribe();
             LOG.info("Subscribed to topic {}", subscriber.getTopic());
         }
     }
