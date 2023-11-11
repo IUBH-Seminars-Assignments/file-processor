@@ -1,5 +1,6 @@
 package com.path.variable.medidoc.fileprocessor.subscriber;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
@@ -71,11 +72,29 @@ public abstract class AbstractSubscriber<T> implements MqttCallback {
             LOG.error("Error while reading message {}", message.getPayload(), e);
         }
         if (mappedMessage != null) {
-            processMessage(mappedMessage);
+            processMessage(mappedMessage, message.getProperties().getAssignedClientIdentifier());
         }
     }
 
-    protected abstract void processMessage(T mappedMessage);
+    protected void publishResults(Object pair, String topic, String clientId) {
+        String json = "";
+        try {
+            json = OBJECT_MAPPER.writeValueAsString(pair);
+        } catch (JsonProcessingException e) {
+            LOG.error("Error while serializing message {}", pair, e);
+        }
+        try {
+            mqttClient.publish(formatTopic(topic, clientId), json.getBytes(), 1, false);
+        } catch (MqttException e) {
+            LOG.error("Could not publish message", e);
+        }
+    }
+
+    protected abstract void processMessage(T mappedMessage, String clientId);
 
     protected abstract Class<T> getMessageClass();
+
+    private String formatTopic(String topic, String clientId) {
+        return "%s/%s".formatted(topic, clientId);
+    }
 }
