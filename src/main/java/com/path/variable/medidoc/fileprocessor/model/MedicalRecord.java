@@ -1,7 +1,6 @@
 package com.path.variable.medidoc.fileprocessor.model;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
@@ -24,6 +23,8 @@ public class MedicalRecord {
     private String externalIdType;
 
     @Nonnull
+    @Lob
+    @Column(name="file_contents", columnDefinition="LONGTEXT NOT NULL")
     private String fileContents;
 
     @Nonnull

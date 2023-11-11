@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Base64;
 
 @Component
 public class FileUploadSubscriber extends AbstractSubscriber<FileUploadMessage> {
@@ -51,13 +52,17 @@ public class FileUploadSubscriber extends AbstractSubscriber<FileUploadMessage> 
     }
 
     private MedicalRecord createNewMedicalRecord(FileUploadMessage message) {
-        LOG.info("Creating new medical record for {}", message.id());
+        LOG.info("Creating new medical record for {}", message.externalId());
         MedicalRecord medicalRecord = new MedicalRecord();
-        medicalRecord.setExternalId(message.id());
-        medicalRecord.setExternalIdType(message.idName());
-        medicalRecord.setFileContents(message.fileContents());
-        medicalRecord.setFileFormat(message.payloadFormat());
+        medicalRecord.setExternalId(message.externalId());
+        medicalRecord.setExternalIdType(message.externalIdType());
+        medicalRecord.setFileContents(convertContents(message.fileContents()));
+        medicalRecord.setFileFormat(message.fileFormat());
         return medicalRecordRepository.save(medicalRecord);
+    }
+
+    private String convertContents(String fileContents) {
+        return new String(Base64.getDecoder().decode(fileContents));
     }
 
     private void mergeWithPatientRecord(MedicalRecord medicalRecord) {

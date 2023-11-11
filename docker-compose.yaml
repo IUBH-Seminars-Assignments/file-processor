@@ -1,5 +1,9 @@
 version: "3.4"
 services:
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6377:6379"
   mysql:
     image: 'mysql:latest'
     environment:
@@ -24,4 +28,12 @@ services:
     depends_on:
       - "mqtt"
       - "mysql"
+  file-uploader:
+    image: "ghcr.io/isaric/file-uploader:main"
+    ports:
+      - "5001:5000"
+    depends_on:
+        - "file-processor"
+        - "mqtt"
+        - "redis"
 
