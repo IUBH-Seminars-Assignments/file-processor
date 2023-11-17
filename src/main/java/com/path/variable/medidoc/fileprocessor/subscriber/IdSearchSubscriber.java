@@ -1,12 +1,10 @@
 package com.path.variable.medidoc.fileprocessor.subscriber;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.path.variable.medidoc.fileprocessor.dto.IdPair;
 import com.path.variable.medidoc.fileprocessor.dto.IdSearch;
 import com.path.variable.medidoc.fileprocessor.repository.MedicalRecordRepository;
 import com.path.variable.medidoc.fileprocessor.subscriber.config.MqttTopics;
 import org.eclipse.paho.mqttv5.client.IMqttClient;
-import org.eclipse.paho.mqttv5.common.MqttException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,23 +39,13 @@ public class IdSearchSubscriber extends AbstractSubscriber<IdSearch> {
     }
 
     @Override
-    protected void processMessage(IdSearch idSearch) {
+    protected void processMessage(IdSearch idSearch, String clientId) {
         medicalRecordRepository.findAll(idSearch.toPageRequest()).stream()
                 .map(IdPair::fromMedicalRecord).distinct()
-                .forEach(this::publishResults);
+                .forEach(pair -> publish(pair, clientId));
     }
 
-    private void publishResults(IdPair pair) {
-        String json = "";
-        try {
-            json = OBJECT_MAPPER.writeValueAsString(pair);
-        } catch (JsonProcessingException e) {
-            LOG.error("Error while serializing message {}", pair, e);
-        }
-        try {
-            mqttClient.publish(resultsTopic, json.getBytes(), 1, false);
-        } catch (MqttException e) {
-            LOG.error("Could not publish message", e);
-        }
+    private void publish(IdPair idPair, String clientId) {
+        publishResults(idPair, resultsTopic, clientId);
     }
 }

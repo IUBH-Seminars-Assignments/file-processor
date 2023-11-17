@@ -1,5 +1,6 @@
 package com.path.variable.medidoc.fileprocessor.subscriber;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
@@ -38,6 +39,7 @@ public abstract class AbstractSubscriber<T> implements MqttCallback {
 
     @Override
     public void messageArrived(String topic, MqttMessage message) {
+        setClientid(topic, message);
         readMessage(message);
     }
 
@@ -71,11 +73,42 @@ public abstract class AbstractSubscriber<T> implements MqttCallback {
             LOG.error("Error while reading message {}", message.getPayload(), e);
         }
         if (mappedMessage != null) {
-            processMessage(mappedMessage);
+            processMessage(mappedMessage, message.getProperties().getAssignedClientIdentifier());
         }
     }
 
-    protected abstract void processMessage(T mappedMessage);
+    protected void publishResults(Object pair, String topic, String clientId) {
+        String json = "";
+        try {
+            json = OBJECT_MAPPER.writeValueAsString(pair);
+        } catch (JsonProcessingException e) {
+            LOG.error("Error while serializing message {}", pair, e);
+        }
+        try {
+            LOG.info("Publishing message to topic {}", formatTopic(topic, clientId));
+            mqttClient.getTopic(formatTopic(topic, clientId)).publish(json.getBytes(), 0, false);
+        } catch (MqttException e) {
+            LOG.error("Could not publish message", e);
+        }
+    }
+
+    protected abstract void processMessage(T mappedMessage, String clientId);
 
     protected abstract Class<T> getMessageClass();
+
+    private String formatTopic(String topic, String clientId) {
+        return "%s/%s".formatted(topic, clientId);
+    }
+
+    private String getClientId(String topic) {
+        try {
+            return topic.split("/")[1];
+        } catch (Exception ex) {
+            return "";
+        }
+    }
+
+    private void setClientid(String topic, MqttMessage message) {
+        message.getProperties().setAssignedClientIdentifier(getClientId(topic));
+    }
 }

@@ -46,7 +46,7 @@ public class FileUploadSubscriber extends AbstractSubscriber<FileUploadMessage> 
     }
 
     @Override
-    protected void processMessage(FileUploadMessage fileUploadMessage) {
+    protected void processMessage(FileUploadMessage fileUploadMessage, String clientId) {
         MedicalRecord medicalRecord = createNewMedicalRecord(fileUploadMessage);
         mergeWithPatientRecord(medicalRecord);
     }

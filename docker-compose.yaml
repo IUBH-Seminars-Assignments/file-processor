@@ -4,6 +4,8 @@ services:
     image: "redis:latest"
     ports:
       - "6377:6379"
+    networks:
+      - file-processor
   mysql:
     image: 'mysql:latest'
     environment:
@@ -13,6 +15,8 @@ services:
       - 'MYSQL_USER=fileprocessor'
     ports:
       - '3307:3306'
+    networks:
+      - file-processor
   mqtt:
     image: 'eclipse-mosquitto:latest'
     ports:
@@ -20,6 +24,8 @@ services:
       - "9002:9001"
     volumes:
       - ./config:/mosquitto/config:rw
+    networks:
+      - file-processor
   file-processor:
     build:
       context: .
@@ -28,6 +34,8 @@ services:
     depends_on:
       - "mqtt"
       - "mysql"
+    networks:
+      - file-processor
   file-uploader:
     image: "ghcr.io/isaric/file-uploader:main"
     ports:
@@ -36,4 +44,8 @@ services:
         - "file-processor"
         - "mqtt"
         - "redis"
+    networks:
+      - file-processor
+networks:
+  file-processor:
 
