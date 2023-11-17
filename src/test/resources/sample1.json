@@ -1,6 +1,6 @@
 {
-  "id" : "1234",
-  "idName" : "OIB",
-  "filePayload" : "<xml></xml>",
-  "payloadFormat" : "xml"
+  "externalId" : "1234",
+  "externalIdType" : "OIB",
+  "fileContents" : "aGVsbG8gLW4K",
+  "fileFormat" : "xml"
 }

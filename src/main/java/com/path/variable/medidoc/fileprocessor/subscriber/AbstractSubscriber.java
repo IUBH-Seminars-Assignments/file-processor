@@ -39,6 +39,7 @@ public abstract class AbstractSubscriber<T> implements MqttCallback {
 
     @Override
     public void messageArrived(String topic, MqttMessage message) {
+        setClientid(topic, message);
         readMessage(message);
     }
 
@@ -84,7 +85,8 @@ public abstract class AbstractSubscriber<T> implements MqttCallback {
             LOG.error("Error while serializing message {}", pair, e);
         }
         try {
-            mqttClient.publish(formatTopic(topic, clientId), json.getBytes(), 1, false);
+            LOG.info("Publishing message to topic {}", formatTopic(topic, clientId));
+            mqttClient.getTopic(formatTopic(topic, clientId)).publish(json.getBytes(), 0, false);
         } catch (MqttException e) {
             LOG.error("Could not publish message", e);
         }
@@ -96,5 +98,17 @@ public abstract class AbstractSubscriber<T> implements MqttCallback {
 
     private String formatTopic(String topic, String clientId) {
         return "%s/%s".formatted(topic, clientId);
+    }
+
+    private String getClientId(String topic) {
+        try {
+            return topic.split("/")[1];
+        } catch (Exception ex) {
+            return "";
+        }
+    }
+
+    private void setClientid(String topic, MqttMessage message) {
+        message.getProperties().setAssignedClientIdentifier(getClientId(topic));
     }
 }
